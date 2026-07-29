@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://\:\/\
+    username: \
+    password: \
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

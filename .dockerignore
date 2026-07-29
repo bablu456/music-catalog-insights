@@ -1,0 +1,6 @@
+node_modules
+.next
+.git
+target
+*.jar
+.DS_Store
