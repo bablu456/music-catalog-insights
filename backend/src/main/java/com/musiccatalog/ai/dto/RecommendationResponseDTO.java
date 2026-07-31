@@ -15,5 +15,6 @@ public class RecommendationResponseDTO {
     private String genreSummary;
     private String favouriteArtist;
     private String listeningTrends;
+    private String interestingObservations;
     private List<String> albumRecommendations;
 }
