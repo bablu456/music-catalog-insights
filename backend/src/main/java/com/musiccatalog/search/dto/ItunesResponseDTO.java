@@ -1,5 +1,6 @@
 package com.musiccatalog.search.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ItunesResponseDTO {
     private Integer resultCount;
     private List<ItunesResult> results;
@@ -19,22 +21,14 @@ public class ItunesResponseDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ItunesResult {
-        private String wrapperType;
-        private String kind;
-        private Long artistId;
         private Long collectionId;
-        private Long trackId;
-        private String artistName;
         private String collectionName;
-        private String trackName;
-        private String previewUrl;
-        private String artworkUrl30;
-        private String artworkUrl60;
-        private String artworkUrl100;
-        private Double collectionPrice;
-        private Double trackPrice;
-        private String releaseDate;
+        private String artistName;
         private String primaryGenreName;
+        private String releaseDate;
+        private Integer trackCount;
+        private String artworkUrl100;
     }
 }

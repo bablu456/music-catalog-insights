@@ -1,16 +1,21 @@
 spring:
+  docker:
+    compose:
+      enabled: false
   datasource:
-    url: jdbc:postgresql://\:\/\
-    username: \
-    password: \
+    url: jdbc:postgresql://localhost:5434/music_catalog
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: password
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        
+
 server:
   port: 8080
 

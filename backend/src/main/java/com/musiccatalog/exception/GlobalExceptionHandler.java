@@ -52,6 +52,24 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles general Business exceptions (e.g. external API errors).
+     */
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(
+            BusinessException ex, HttpServletRequest request) {
+            
+        ApiError apiError = ApiError.builder()
+                .code(ex.getErrorCode())
+                .message(ex.getMessage())
+                .build();
+                
+        HttpStatus status = "EXTERNAL_API_ERROR".equals(ex.getErrorCode()) ? 
+                HttpStatus.BAD_GATEWAY : HttpStatus.BAD_REQUEST;
+                
+        return buildResponse(apiError, status, request);
+    }
+
+    /**
      * Handles 400 Bad Request from invalid arguments.
      */
     @ExceptionHandler(IllegalArgumentException.class)

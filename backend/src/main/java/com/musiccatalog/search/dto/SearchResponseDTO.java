@@ -19,4 +19,5 @@ public class SearchResponseDTO {
     private String previewUrl;
     private String releaseDate;
     private String genre;
+    private Integer trackCount;
 }

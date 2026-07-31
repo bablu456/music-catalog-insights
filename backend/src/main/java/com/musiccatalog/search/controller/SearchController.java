@@ -29,10 +29,9 @@ public class SearchController {
     @Operation(summary = "Search for songs, albums, or artists")
     public ApiResponse<List<SearchResponseDTO>> search(
             @RequestParam @NotBlank(message = "Search query must not be blank") String query,
-            @RequestParam(required = false) String type,
             HttpServletRequest request) {
 
-        List<SearchResponseDTO> results = searchService.search(query, type);
+        List<SearchResponseDTO> results = searchService.search(query);
         return ApiResponse.ok(results, request.getRequestURI());
     }
 }

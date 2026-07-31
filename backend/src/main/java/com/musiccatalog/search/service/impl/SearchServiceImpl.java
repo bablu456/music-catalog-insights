@@ -19,8 +19,8 @@ public class SearchServiceImpl implements SearchService {
     private final SearchMapper searchMapper;
 
     @Override
-    public List<SearchResponseDTO> search(String query, String type) {
-        ItunesResponseDTO itunesResponse = itunesClient.search(query, type);
+    public List<SearchResponseDTO> search(String query) {
+        ItunesResponseDTO itunesResponse = itunesClient.search(query);
 
         if (itunesResponse == null || itunesResponse.getResults() == null) {
             return Collections.emptyList();
