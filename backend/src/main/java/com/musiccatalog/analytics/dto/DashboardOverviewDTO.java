@@ -11,7 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DashboardOverviewDTO {
     private int totalAlbums;
-    private int totalArtists;
-    private int totalGenres;
+    private double albumsPercentageChange;
+    private String favouriteArtist;
+    private int favouriteArtistCount;
+    private String favouriteGenre;
+    private double favouriteGenrePercentage;
     private double averageRating;
 }

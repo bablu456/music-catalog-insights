@@ -30,7 +30,8 @@ public class PromptBuilder {
                 "2. Favorite Artists\n" +
                 "3. Listening Trends\n" +
                 "4. Interesting Observations\n" +
-                "5. Five Album Recommendations\n\n" +
+                "5. Listening Personality (e.g. Alternative Rock Explorer, Classic Rock Collector)\n" +
+                "6. Five Album Recommendations\n\n" +
                 "Rules\n" +
                 "Do not hallucinate.\n" +
                 "Base every statement on the provided data.\n" +
@@ -41,6 +42,7 @@ public class PromptBuilder {
                 "    \"favouriteArtist\": \"...\",\n" +
                 "    \"listeningTrends\": \"...\",\n" +
                 "    \"interestingObservations\": \"...\",\n" +
+                "    \"listeningPersonality\": \"...\",\n" +
                 "    \"albumRecommendations\":[]\n" +
                 "}";
     }

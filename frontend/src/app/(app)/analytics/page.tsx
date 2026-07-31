@@ -22,49 +22,13 @@ import {
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1'];
 
 export default function AnalyticsPage() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['analytics'],
-    queryFn: analyticsService.getAnalytics,
-  });
+  const { data: genresData, isLoading: genresLoading } = useQuery({ queryKey: ['analytics-genres'], queryFn: analyticsService.getGenres });
+  const { data: artistsData, isLoading: artistsLoading } = useQuery({ queryKey: ['analytics-artists'], queryFn: analyticsService.getArtists });
+  const { data: releasesData, isLoading: releasesLoading } = useQuery({ queryKey: ['analytics-releases'], queryFn: analyticsService.getReleases });
+  const { data: ratingsData, isLoading: ratingsLoading } = useQuery({ queryKey: ['analytics-ratings'], queryFn: analyticsService.getRatings });
+  const { data: overviewData } = useQuery({ queryKey: ['analytics-overview'], queryFn: analyticsService.getOverview });
 
-  const analytics = data?.data;
-  const isLibraryEmpty = analytics?.overview?.totalAlbums === 0;
-
-  if (isLoading) {
-    return (
-      <div className="max-w-6xl space-y-6">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight">Analytics</h2>
-          <p className="text-muted-foreground">Loading your listening patterns...</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="animate-pulse h-[350px]">
-              <CardContent className="h-full flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/30" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="max-w-6xl space-y-6">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight">Analytics</h2>
-        </div>
-        <Card className="bg-destructive/10 border-destructive/20 text-destructive">
-          <CardContent className="p-6 flex flex-col items-center justify-center text-center">
-            <p className="font-medium">Failed to load analytics data.</p>
-            <p className="text-sm mt-1 opacity-80">Please try again later.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const isLibraryEmpty = overviewData?.data?.totalAlbums === 0;
 
   if (isLibraryEmpty) {
     return (
@@ -104,7 +68,6 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Genre Distribution Pie Chart */}
         <Card>
           <CardHeader>
             <CardTitle>Top Genres</CardTitle>
@@ -112,33 +75,23 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={analytics?.topGenres}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {analytics?.topGenres.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
-                    itemStyle={{ color: 'hsl(var(--foreground))' }}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              {genresLoading ? (
+                <div className="h-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground/30" /></div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={genresData?.data} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={2} dataKey="value">
+                      {genresData?.data?.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }} itemStyle={{ color: 'hsl(var(--foreground))' }} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Top Artist Horizontal Bar */}
         <Card>
           <CardHeader>
             <CardTitle>Top Artists</CardTitle>
@@ -146,27 +99,23 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={analytics?.topArtists}
-                  layout="vertical"
-                  margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
-                  <XAxis type="number" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis dataKey="name" type="category" width={80} stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    cursor={{ fill: 'hsl(var(--muted))' }}
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
-                  />
-                  <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {artistsLoading ? (
+                <div className="h-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground/30" /></div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={artistsData?.data} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+                    <XAxis type="number" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis dataKey="name" type="category" width={80} stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                    <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }} />
+                    <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Release Year Bar Chart */}
         <Card>
           <CardHeader>
             <CardTitle>Release Years</CardTitle>
@@ -174,23 +123,23 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={analytics?.releaseYears}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                  <XAxis dataKey="name" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    cursor={{ fill: 'hsl(var(--muted))' }}
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
-                  />
-                  <Bar dataKey="value" fill="#10b981" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {releasesLoading ? (
+                <div className="h-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground/30" /></div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={releasesData?.data}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                    <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }} />
+                    <Bar dataKey="value" fill="#10b981" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Rating Histogram */}
         <Card>
           <CardHeader>
             <CardTitle>Rating Distribution</CardTitle>
@@ -198,18 +147,19 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={analytics?.ratingDistribution}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                  <XAxis dataKey="name" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    cursor={{ fill: 'hsl(var(--muted))' }}
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
-                  />
-                  <Bar dataKey="value" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {ratingsLoading ? (
+                <div className="h-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground/30" /></div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={ratingsData?.data}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                    <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }} />
+                    <Bar dataKey="value" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>

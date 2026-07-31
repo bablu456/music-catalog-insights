@@ -21,13 +21,43 @@ public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
 
-    @GetMapping
-    @Operation(summary = "Get analytics data for the authenticated user")
-    public ApiResponse<AnalyticsResponseDTO> getAnalytics(
+    @GetMapping("/overview")
+    @Operation(summary = "Get dashboard overview metrics")
+    public ApiResponse<com.musiccatalog.analytics.dto.DashboardOverviewDTO> getOverview(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
+        return ApiResponse.ok(analyticsService.getOverview(userDetails.getId()), request.getRequestURI());
+    }
 
-        AnalyticsResponseDTO response = analyticsService.getAnalytics(userDetails.getId());
-        return ApiResponse.ok(response, request.getRequestURI());
+    @GetMapping("/genres")
+    @Operation(summary = "Get genre distribution chart data")
+    public ApiResponse<java.util.List<com.musiccatalog.analytics.dto.ChartDataDTO>> getGenres(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return ApiResponse.ok(analyticsService.getGenreDistribution(userDetails.getId()), request.getRequestURI());
+    }
+
+    @GetMapping("/artists")
+    @Operation(summary = "Get top artists chart data")
+    public ApiResponse<java.util.List<com.musiccatalog.analytics.dto.ChartDataDTO>> getArtists(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return ApiResponse.ok(analyticsService.getTopArtists(userDetails.getId()), request.getRequestURI());
+    }
+
+    @GetMapping("/releases")
+    @Operation(summary = "Get albums by release year chart data")
+    public ApiResponse<java.util.List<com.musiccatalog.analytics.dto.ChartDataDTO>> getReleases(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return ApiResponse.ok(analyticsService.getAlbumsByReleaseYear(userDetails.getId()), request.getRequestURI());
+    }
+
+    @GetMapping("/ratings")
+    @Operation(summary = "Get rating distribution chart data")
+    public ApiResponse<java.util.List<com.musiccatalog.analytics.dto.ChartDataDTO>> getRatings(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return ApiResponse.ok(analyticsService.getRatingDistribution(userDetails.getId()), request.getRequestURI());
     }
 }

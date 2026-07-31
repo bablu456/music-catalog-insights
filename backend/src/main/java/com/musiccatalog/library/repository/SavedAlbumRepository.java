@@ -13,4 +13,8 @@ public interface SavedAlbumRepository extends JpaRepository<SavedAlbum, UUID> {
     List<SavedAlbum> findAllByUserId(UUID userId);
     Optional<SavedAlbum> findByIdAndUserId(UUID id, UUID userId);
     boolean existsByAppleCatalogIdAndUserId(String appleCatalogId, UUID userId);
+    
+    // For Activity Timeline and Analytics
+    org.springframework.data.domain.Page<SavedAlbum> findAllByUserIdOrderByUpdatedAtDesc(UUID userId, org.springframework.data.domain.Pageable pageable);
+    List<SavedAlbum> findAllByUserIdAndCreatedAtAfter(UUID userId, java.time.LocalDateTime date);
 }

@@ -20,23 +20,31 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final SavedAlbumRepository savedAlbumRepository;
 
     @Override
-    public AnalyticsResponseDTO getAnalytics(UUID userId) {
+    public DashboardOverviewDTO getOverview(UUID userId) {
         List<SavedAlbum> albums = savedAlbumRepository.findAllByUserId(userId);
-
         if (albums.isEmpty()) {
-            return AnalyticsResponseDTO.builder()
-                    .overview(new DashboardOverviewDTO(0, 0, 0, 0.0))
-                    .topGenres(Collections.emptyList())
-                    .topArtists(Collections.emptyList())
-                    .releaseYears(Collections.emptyList())
-                    .ratingDistribution(Collections.emptyList())
-                    .build();
+            return new DashboardOverviewDTO(0, 0.0, "N/A", 0, "N/A", 0.0, 0.0);
         }
 
-        // Overview
         int totalAlbums = albums.size();
-        int totalArtists = (int) albums.stream().map(SavedAlbum::getArtistName).filter(Objects::nonNull).distinct().count();
-        int totalGenres = (int) albums.stream().map(SavedAlbum::getGenre).filter(Objects::nonNull).distinct().count();
+        
+        // Calculate week-over-week percentage change
+        java.time.LocalDateTime oneWeekAgo = java.time.LocalDateTime.now().minusWeeks(1);
+        long newAlbumsThisWeek = albums.stream().filter(a -> a.getCreatedAt() != null && a.getCreatedAt().isAfter(oneWeekAgo)).count();
+        long oldAlbumsCount = totalAlbums - newAlbumsThisWeek;
+        double albumsPercentageChange = oldAlbumsCount == 0 ? 100.0 : ((double) newAlbumsThisWeek / oldAlbumsCount) * 100.0;
+        
+        // Favourite Artist
+        Map.Entry<String, Long> topArtist = getTopEntry(albums, SavedAlbum::getArtistName);
+        String favArtist = topArtist != null ? topArtist.getKey() : "N/A";
+        int favArtistCount = topArtist != null ? topArtist.getValue().intValue() : 0;
+        
+        // Favourite Genre
+        Map.Entry<String, Long> topGenre = getTopEntry(albums, SavedAlbum::getGenre);
+        String favGenre = topGenre != null ? topGenre.getKey() : "N/A";
+        double favGenrePercentage = topGenre != null ? ((double) topGenre.getValue() / totalAlbums) * 100.0 : 0.0;
+        
+        // Average Rating
         double averageRating = albums.stream()
                 .map(SavedAlbum::getUserRating)
                 .filter(Objects::nonNull)
@@ -44,16 +52,33 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 .average()
                 .orElse(0.0);
 
-        DashboardOverviewDTO overview = new DashboardOverviewDTO(totalAlbums, totalArtists, totalGenres, Math.round(averageRating * 10.0) / 10.0);
+        return new DashboardOverviewDTO(
+                totalAlbums,
+                Math.round(albumsPercentageChange * 10.0) / 10.0,
+                favArtist,
+                favArtistCount,
+                favGenre,
+                Math.round(favGenrePercentage * 10.0) / 10.0,
+                Math.round(averageRating * 10.0) / 10.0
+        );
+    }
 
-        // Top Genres
-        List<ChartDataDTO> topGenres = getTopN(albums, SavedAlbum::getGenre, 5);
+    @Override
+    public List<ChartDataDTO> getGenreDistribution(UUID userId) {
+        List<SavedAlbum> albums = savedAlbumRepository.findAllByUserId(userId);
+        return getTopN(albums, SavedAlbum::getGenre, 10);
+    }
 
-        // Top Artists
-        List<ChartDataDTO> topArtists = getTopN(albums, SavedAlbum::getArtistName, 5);
+    @Override
+    public List<ChartDataDTO> getTopArtists(UUID userId) {
+        List<SavedAlbum> albums = savedAlbumRepository.findAllByUserId(userId);
+        return getTopN(albums, SavedAlbum::getArtistName, 5);
+    }
 
-        // Release Years
-        List<ChartDataDTO> releaseYears = albums.stream()
+    @Override
+    public List<ChartDataDTO> getAlbumsByReleaseYear(UUID userId) {
+        List<SavedAlbum> albums = savedAlbumRepository.findAllByUserId(userId);
+        return albums.stream()
                 .map(SavedAlbum::getReleaseDate)
                 .filter(Objects::nonNull)
                 .map(date -> date.length() >= 4 ? date.substring(0, 4) : "Unknown")
@@ -62,8 +87,11 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 .sorted(Map.Entry.comparingByKey())
                 .map(entry -> new ChartDataDTO(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
+    }
 
-        // Rating Distribution
+    @Override
+    public List<ChartDataDTO> getRatingDistribution(UUID userId) {
+        List<SavedAlbum> albums = savedAlbumRepository.findAllByUserId(userId);
         List<ChartDataDTO> ratingDistribution = albums.stream()
                 .map(SavedAlbum::getUserRating)
                 .filter(Objects::nonNull)
@@ -73,7 +101,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 .map(entry -> new ChartDataDTO(entry.getKey() + " Stars", entry.getValue()))
                 .collect(Collectors.toList());
 
-        // Ensure 1-5 stars are present even if 0 count
         List<ChartDataDTO> completeRatingDistribution = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
             String label = i + " Stars";
@@ -84,14 +111,17 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                     .orElse(0L);
             completeRatingDistribution.add(new ChartDataDTO(label, count));
         }
+        return completeRatingDistribution;
+    }
 
-        return AnalyticsResponseDTO.builder()
-                .overview(overview)
-                .topGenres(topGenres)
-                .topArtists(topArtists)
-                .releaseYears(releaseYears)
-                .ratingDistribution(completeRatingDistribution)
-                .build();
+    private Map.Entry<String, Long> getTopEntry(List<SavedAlbum> albums, Function<SavedAlbum, String> keyExtractor) {
+        return albums.stream()
+                .map(keyExtractor)
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .orElse(null);
     }
 
     private List<ChartDataDTO> getTopN(List<SavedAlbum> albums, Function<SavedAlbum, String> keyExtractor, int limit) {

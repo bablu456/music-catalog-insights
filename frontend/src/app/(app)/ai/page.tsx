@@ -102,7 +102,7 @@ export default function AIPage() {
         <div className="space-y-1">
           <h2 className="text-2xl font-bold tracking-tight">AI Insights</h2>
           <p className="text-muted-foreground">
-            Personalized analysis powered by Gemini 1.5 Flash.
+            Personalized analysis powered by Gemini.
           </p>
         </div>
         <Button onClick={() => refetch()} disabled={isFetching} variant="outline" size="sm" className="hidden sm:flex">
@@ -141,18 +141,25 @@ export default function AIPage() {
 
         {/* Trends & Observations */}
         <div className="space-y-6">
-          <Card className="border-t-4 border-t-amber-500 shadow-md h-full">
+          <Card className="border-t-4 border-t-amber-500 shadow-md h-full flex flex-col">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-amber-500" />
-                Listening Trends
+                Listening Trends & Personality
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 flex-1">
               <p className="text-sm leading-relaxed">{recommendation.listeningTrends}</p>
               
+              {recommendation.listeningPersonality && (
+                <div className="bg-violet-500/10 p-4 rounded-lg border border-violet-500/20">
+                  <h4 className="text-sm font-semibold text-violet-600 dark:text-violet-400 mb-2">Listener Profile</h4>
+                  <p className="text-sm">{recommendation.listeningPersonality}</p>
+                </div>
+              )}
+              
               {recommendation.interestingObservations && (
-                <div className="bg-amber-500/10 p-4 rounded-lg border border-amber-500/20">
+                <div className="bg-amber-500/10 p-4 rounded-lg border border-amber-500/20 mt-auto">
                   <h4 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">Interesting Observation</h4>
                   <p className="text-sm">{recommendation.interestingObservations}</p>
                 </div>
@@ -174,7 +181,7 @@ export default function AIPage() {
         <CardContent>
           <ul className="grid gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {recommendation.albumRecommendations.map((album, idx) => (
-              <li key={idx} className="bg-muted/50 border rounded-lg p-4 text-sm flex items-start gap-3">
+              <li key={idx} className="bg-muted/50 border rounded-lg p-4 text-sm flex items-start gap-3 hover:bg-muted/80 transition-colors">
                 <span className="font-bold text-violet-500 text-lg leading-none shrink-0">{idx + 1}</span>
                 <span className="leading-tight">{album}</span>
               </li>

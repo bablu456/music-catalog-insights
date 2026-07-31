@@ -8,22 +8,33 @@ export interface ChartData {
 
 export interface DashboardOverview {
   totalAlbums: number;
-  totalArtists: number;
-  totalGenres: number;
+  albumsPercentageChange: number;
+  favouriteArtist: string;
+  favouriteArtistCount: number;
+  favouriteGenre: string;
+  favouriteGenrePercentage: number;
   averageRating: number;
 }
 
-export interface AnalyticsResponse {
-  overview: DashboardOverview;
-  topGenres: ChartData[];
-  topArtists: ChartData[];
-  releaseYears: ChartData[];
-  ratingDistribution: ChartData[];
-}
-
 export const analyticsService = {
-  getAnalytics: async (): Promise<ApiResponse<AnalyticsResponse>> => {
-    const response = await api.get('/analytics');
+  getOverview: async (): Promise<ApiResponse<DashboardOverview>> => {
+    const response = await api.get('/analytics/overview');
     return response.data;
   },
+  getGenres: async (): Promise<ApiResponse<ChartData[]>> => {
+    const response = await api.get('/analytics/genres');
+    return response.data;
+  },
+  getArtists: async (): Promise<ApiResponse<ChartData[]>> => {
+    const response = await api.get('/analytics/artists');
+    return response.data;
+  },
+  getReleases: async (): Promise<ApiResponse<ChartData[]>> => {
+    const response = await api.get('/analytics/releases');
+    return response.data;
+  },
+  getRatings: async (): Promise<ApiResponse<ChartData[]>> => {
+    const response = await api.get('/analytics/ratings');
+    return response.data;
+  }
 };
