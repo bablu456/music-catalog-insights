@@ -11,8 +11,13 @@ import com.musiccatalog.library.mapper.SavedAlbumMapper;
 import com.musiccatalog.library.repository.SavedAlbumRepository;
 import com.musiccatalog.library.service.LibraryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import com.musiccatalog.common.PagedResponseDTO;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,13 +32,15 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SavedAlbumResponseDTO> getAllSavedAlbums(UUID userId) {
-        List<SavedAlbum> albums = savedAlbumRepository.findAllByUserId(userId);
-        return savedAlbumMapper.toDtoList(albums);
+    public PagedResponseDTO<SavedAlbumResponseDTO> getAllSavedAlbums(UUID userId, int page, int size) {
+        Page<SavedAlbum> albumsPage = savedAlbumRepository.findAllByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
+        Page<SavedAlbumResponseDTO> dtoPage = albumsPage.map(savedAlbumMapper::toDto);
+        return PagedResponseDTO.of(dtoPage);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = {"analyticsCache", "recommendationCache"}, key = "#userId")
     public SavedAlbumResponseDTO saveAlbum(UUID userId, SavedAlbumRequestDTO requestDTO) {
         if (savedAlbumRepository.existsByAppleCatalogIdAndUserId(requestDTO.getAppleCatalogId(), userId)) {
             throw new DuplicateResourceException("Album with Apple Catalog ID " + requestDTO.getAppleCatalogId() + " is already saved.");
@@ -51,6 +58,7 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"analyticsCache", "recommendationCache"}, key = "#userId")
     public SavedAlbumResponseDTO updateAlbum(UUID id, UUID userId, SavedAlbumRequestDTO requestDTO) {
         SavedAlbum existingAlbum = savedAlbumRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Saved album not found or you don't have permission to access it"));
@@ -63,6 +71,7 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"analyticsCache", "recommendationCache"}, key = "#userId")
     public void deleteAlbum(UUID id, UUID userId) {
         SavedAlbum existingAlbum = savedAlbumRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Saved album not found or you don't have permission to access it"));

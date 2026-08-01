@@ -6,6 +6,7 @@ import com.musiccatalog.search.dto.SearchResponseDTO;
 import com.musiccatalog.search.mapper.SearchMapper;
 import com.musiccatalog.search.service.SearchService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -19,6 +20,7 @@ public class SearchServiceImpl implements SearchService {
     private final SearchMapper searchMapper;
 
     @Override
+    @Cacheable(value = "searchCache", key = "#query", unless = "#result == null or #result.isEmpty()")
     public List<SearchResponseDTO> search(String query) {
         ItunesResponseDTO itunesResponse = itunesClient.search(query);
 

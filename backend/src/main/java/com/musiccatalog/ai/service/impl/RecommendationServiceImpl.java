@@ -8,6 +8,7 @@ import com.musiccatalog.exception.BusinessException;
 import com.musiccatalog.library.entity.SavedAlbum;
 import com.musiccatalog.library.repository.SavedAlbumRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final PromptBuilder promptBuilder;
 
     @Override
+    @Cacheable(value = "recommendationCache", key = "#userId")
     public RecommendationResponseDTO generateRecommendations(UUID userId) {
         List<SavedAlbum> library = savedAlbumRepository.findAllByUserId(userId);
 

@@ -7,11 +7,14 @@ import { libraryService, SaveAlbumRequest } from "@/services/library.service";
 import { SearchInput } from "@/features/search/components/SearchInput";
 import { AlbumCard } from "@/features/search/components/AlbumCard";
 import { toast } from "sonner";
-import { Music2, Loader2, AlertCircle } from "lucide-react";
+import { Music2, Loader2, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const size = 10;
 
   const { data: results, isLoading, isError, error } = useQuery({
     queryKey: ['search', query],
@@ -49,7 +52,7 @@ export default function SearchPage() {
         <p className="text-muted-foreground text-lg">Search the entire iTunes catalog for your favorite albums.</p>
         
         <div className="pt-4">
-          <SearchInput onSearch={setQuery} isLoading={isLoading} />
+          <SearchInput onSearch={(q) => { setQuery(q); setPage(0); }} isLoading={isLoading} />
         </div>
       </div>
 
@@ -87,22 +90,53 @@ export default function SearchPage() {
           </div>
         )}
 
-        {results && results.length > 0 && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"
-          >
-            {results.map((album) => (
-              <AlbumCard 
-                key={album.id} 
-                album={album} 
-                onSave={handleSave} 
-                isSaving={saveMutation.isPending && saveMutation.variables?.appleCatalogId === album.id} 
-              />
-            ))}
-          </motion.div>
-        )}
+        {results && results.length > 0 && (() => {
+          const totalPages = Math.ceil(results.length / size);
+          const paginatedResults = results.slice(page * size, (page + 1) * size);
+          
+          return (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-8"
+            >
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {paginatedResults.map((album) => (
+                  <AlbumCard 
+                    key={album.id} 
+                    album={album} 
+                    onSave={handleSave} 
+                    isSaving={saveMutation.isPending && saveMutation.variables?.appleCatalogId === album.id} 
+                  />
+                ))}
+              </div>
+              
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-8">
+                  <Button
+                    variant="outline"
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                    disabled={page === 0}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    Previous
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    Page {page + 1} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                    disabled={page === totalPages - 1}
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          );
+        })()}
       </div>
     </div>
   );

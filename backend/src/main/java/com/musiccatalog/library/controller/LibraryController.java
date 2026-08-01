@@ -1,5 +1,6 @@
 package com.musiccatalog.library.controller;
 
+import com.musiccatalog.common.PagedResponseDTO;
 import com.musiccatalog.common.ApiResponse;
 import com.musiccatalog.library.dto.SavedAlbumRequestDTO;
 import com.musiccatalog.library.dto.SavedAlbumResponseDTO;
@@ -27,11 +28,13 @@ public class LibraryController {
 
     @GetMapping
     @Operation(summary = "Get all saved albums for the authenticated user")
-    public ApiResponse<List<SavedAlbumResponseDTO>> getAllAlbums(
+    public ApiResponse<PagedResponseDTO<SavedAlbumResponseDTO>> getAllAlbums(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
             HttpServletRequest request) {
         
-        List<SavedAlbumResponseDTO> albums = libraryService.getAllSavedAlbums(userDetails.getId());
+        PagedResponseDTO<SavedAlbumResponseDTO> albums = libraryService.getAllSavedAlbums(userDetails.getId(), page, size);
         return ApiResponse.ok(albums, request.getRequestURI());
     }
 

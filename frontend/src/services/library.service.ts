@@ -40,9 +40,21 @@ export interface UpdateAlbumRequest {
   userNotes?: string;
 }
 
+export interface PagedResponse<T> {
+  content: T[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  isLast: boolean;
+  isFirst: boolean;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
 export const libraryService = {
-  getAllSavedAlbums: async (): Promise<SavedAlbum[]> => {
-    const response = await api.get<ApiResponse<SavedAlbum[]>>('/library');
+  getAllSavedAlbums: async (page = 0, size = 20): Promise<PagedResponse<SavedAlbum>> => {
+    const response = await api.get<ApiResponse<PagedResponse<SavedAlbum>>>(`/library?page=${page}&size=${size}`);
     return response.data.data;
   },
 

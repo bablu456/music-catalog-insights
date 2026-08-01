@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "saved_albums", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "appleCatalogId"})
+        @UniqueConstraint(columnNames = {"user_id", "apple_catalog_id"})
 })
 @Getter
 @Setter

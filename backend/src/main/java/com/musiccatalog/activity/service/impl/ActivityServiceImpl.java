@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.musiccatalog.common.PagedResponseDTO;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -24,11 +26,11 @@ public class ActivityServiceImpl implements ActivityService {
     private final SavedAlbumRepository savedAlbumRepository;
 
     @Override
-    public List<TimelineEventDTO> getRecentActivity(UUID userId) {
+    public PagedResponseDTO<TimelineEventDTO> getRecentActivity(UUID userId, int page, int size) {
         List<TimelineEventDTO> events = new ArrayList<>();
 
         // Fetch recent searches
-        List<SearchHistory> searches = searchHistoryRepository.findByUserIdOrderBySearchedAtDesc(userId, PageRequest.of(0, 10));
+        List<SearchHistory> searches = searchHistoryRepository.findByUserIdOrderBySearchedAtDesc(userId, PageRequest.of(page, size));
         for (SearchHistory s : searches) {
             events.add(TimelineEventDTO.builder()
                     .id(s.getId().toString())
@@ -41,7 +43,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         // Fetch recent albums
-        List<SavedAlbum> albums = savedAlbumRepository.findAllByUserIdOrderByUpdatedAtDesc(userId, PageRequest.of(0, 15)).getContent();
+        List<SavedAlbum> albums = savedAlbumRepository.findAllByUserIdOrderByUpdatedAtDesc(userId, PageRequest.of(page, size)).getContent();
         for (SavedAlbum a : albums) {
             boolean isNew = a.getCreatedAt().equals(a.getUpdatedAt());
             
@@ -74,9 +76,22 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         // Sort combined list descending by timestamp
-        return events.stream()
+        List<TimelineEventDTO> sortedEvents = events.stream()
                 .sorted(Comparator.comparing(TimelineEventDTO::getTimestamp).reversed())
-                .limit(20)
+                .limit(size)
                 .collect(Collectors.toList());
+                
+        PagedResponseDTO<TimelineEventDTO> response = new PagedResponseDTO<>();
+        response.setContent(sortedEvents);
+        response.setPageNumber(page);
+        response.setPageSize(size);
+        response.setTotalElements(100); // Approximated for merged lists
+        response.setTotalPages(100 / size);
+        response.setLast(sortedEvents.size() < size);
+        response.setFirst(page == 0);
+        response.setHasNext(!response.isLast());
+        response.setHasPrevious(page > 0);
+        
+        return response;
     }
 }

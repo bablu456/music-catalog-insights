@@ -6,7 +6,8 @@ import { libraryService, SavedAlbum } from "@/services/library.service";
 import { LibraryCard } from "@/features/library/components/LibraryCard";
 import { EditAlbumDialog } from "@/features/library/components/EditAlbumDialog";
 import { toast } from "sonner";
-import { Library, Loader2, AlertCircle } from "lucide-react";
+import { Library, Loader2, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 export default function LibraryPage() {
@@ -15,10 +16,15 @@ export default function LibraryPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const { data: albums, isLoading, isError, error } = useQuery({
-    queryKey: ['library'],
-    queryFn: () => libraryService.getAllSavedAlbums(),
+  const [page, setPage] = useState(0);
+  const size = 12;
+
+  const { data: pagedData, isLoading, isError, error } = useQuery({
+    queryKey: ['library', page],
+    queryFn: () => libraryService.getAllSavedAlbums(page, size),
   });
+
+  const albums = pagedData?.content;
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => libraryService.deleteAlbum(id),
@@ -85,17 +91,43 @@ export default function LibraryPage() {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            className="space-y-8"
           >
-            {albums.map((album) => (
-              <LibraryCard 
-                key={album.id} 
-                album={album} 
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                isDeleting={deletingId === album.id}
-              />
-            ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {albums.map((album) => (
+                <LibraryCard 
+                  key={album.id} 
+                  album={album} 
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  isDeleting={deletingId === album.id}
+                />
+              ))}
+            </div>
+
+            {pagedData && pagedData.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-8">
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={pagedData.isFirst}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {pagedData.pageNumber + 1} of {pagedData.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.min(pagedData.totalPages - 1, p + 1))}
+                  disabled={pagedData.isLast}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            )}
           </motion.div>
         )}
       </div>
