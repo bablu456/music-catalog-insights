@@ -90,8 +90,9 @@ public class GeminiAIProviderImpl implements AIProvider {
     }
 
     private RecommendationResponseDTO parseJsonResponse(String generatedText) {
+        String jsonStr = "";
         try {
-            String jsonStr = generatedText.trim();
+            jsonStr = generatedText.trim();
             if (jsonStr.startsWith("```json")) {
                 jsonStr = jsonStr.substring(7);
             }
@@ -102,8 +103,12 @@ public class GeminiAIProviderImpl implements AIProvider {
                 jsonStr = jsonStr.substring(0, jsonStr.length() - 3);
             }
             
+            // Allow unknown properties to avoid mapping errors if Gemini adds extra fields
+            objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             return objectMapper.readValue(jsonStr.trim(), RecommendationResponseDTO.class);
         } catch (Exception e) {
+            log.error("Failed to map JSON response to DTO. Error: {}", e.getMessage(), e);
+            log.error("Raw JSON string attempted to parse: \n{}", jsonStr);
             return getFallbackResponse("Failed to map JSON response to DTO.");
         }
     }

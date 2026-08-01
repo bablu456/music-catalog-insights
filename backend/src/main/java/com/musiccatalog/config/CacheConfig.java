@@ -15,7 +15,7 @@ public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("searchCache", "analyticsCache", "recommendationCache");
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("searchCache", "analyticsOverviewCache", "analyticsGenresCache", "analyticsArtistsCache", "analyticsReleasesCache", "analyticsRatingsCache", "recommendationCache");
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .initialCapacity(100)
                 .maximumSize(500)

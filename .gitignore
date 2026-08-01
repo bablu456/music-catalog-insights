@@ -38,3 +38,5 @@ application-secrets.yml
 # Databases
 backend/data/
 *.db
+
+.env

@@ -31,7 +31,7 @@ public interface SavedAlbumRepository extends JpaRepository<SavedAlbum, UUID> {
     @org.springframework.data.jpa.repository.Query("SELECT SUBSTRING(a.releaseDate, 1, 4), COUNT(a) FROM SavedAlbum a WHERE a.user.id = :userId AND a.releaseDate IS NOT NULL GROUP BY SUBSTRING(a.releaseDate, 1, 4) ORDER BY SUBSTRING(a.releaseDate, 1, 4)")
     List<Object[]> findAlbumsByReleaseYear(@org.springframework.data.repository.query.Param("userId") UUID userId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT CAST(a.userRating AS string), COUNT(a) FROM SavedAlbum a WHERE a.user.id = :userId AND a.userRating IS NOT NULL GROUP BY a.userRating ORDER BY a.userRating")
+    @org.springframework.data.jpa.repository.Query("SELECT a.userRating, COUNT(a) FROM SavedAlbum a WHERE a.user.id = :userId AND a.userRating IS NOT NULL GROUP BY a.userRating ORDER BY a.userRating")
     List<Object[]> findRatingDistribution(@org.springframework.data.repository.query.Param("userId") UUID userId);
 
     @org.springframework.data.jpa.repository.Query("SELECT AVG(a.userRating) FROM SavedAlbum a WHERE a.user.id = :userId AND a.userRating IS NOT NULL")

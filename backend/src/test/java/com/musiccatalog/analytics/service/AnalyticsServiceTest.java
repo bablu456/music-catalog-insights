@@ -62,7 +62,11 @@ class AnalyticsServiceTest {
 
     @Test
     void getOverview_ReturnsCorrectAggregations() {
-        when(savedAlbumRepository.findAllByUserId(userId)).thenReturn(List.of(album1, album2, album3));
+        when(savedAlbumRepository.countByUserId(userId)).thenReturn(3L);
+        when(savedAlbumRepository.countByUserIdAndCreatedAtAfter(eq(userId), any())).thenReturn(1L);
+        when(savedAlbumRepository.findTopArtistsByUserId(eq(userId), any())).thenReturn(List.<Object[]>of(new Object[]{"Artist A", 2L}));
+        when(savedAlbumRepository.findTopGenresByUserId(eq(userId), any())).thenReturn(List.<Object[]>of(new Object[]{"Rock", 2L}));
+        when(savedAlbumRepository.getAverageRatingByUserId(userId)).thenReturn(4.0);
 
         DashboardOverviewDTO result = analyticsService.getOverview(userId);
 
@@ -76,7 +80,7 @@ class AnalyticsServiceTest {
 
     @Test
     void getOverview_ReturnsEmptyDefaults() {
-        when(savedAlbumRepository.findAllByUserId(userId)).thenReturn(Collections.emptyList());
+        when(savedAlbumRepository.countByUserId(userId)).thenReturn(0L);
 
         DashboardOverviewDTO result = analyticsService.getOverview(userId);
 
@@ -88,7 +92,8 @@ class AnalyticsServiceTest {
 
     @Test
     void getGenreDistribution_ReturnsTopGenres() {
-        when(savedAlbumRepository.findAllByUserId(userId)).thenReturn(List.of(album1, album2, album3));
+        when(savedAlbumRepository.findTopGenresByUserId(eq(userId), any()))
+                .thenReturn(List.<Object[]>of(new Object[]{"Rock", 2L}, new Object[]{"Pop", 1L}));
 
         List<ChartDataDTO> result = analyticsService.getGenreDistribution(userId);
 

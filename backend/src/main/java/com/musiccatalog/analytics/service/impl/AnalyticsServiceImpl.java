@@ -20,7 +20,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final SavedAlbumRepository savedAlbumRepository;
 
     @Override
-    @Cacheable(value = "analyticsCache", key = "#userId")
+    @Cacheable(value = "analyticsOverviewCache", key = "#userId")
     public DashboardOverviewDTO getOverview(UUID userId) {
         long totalAlbums = savedAlbumRepository.countByUserId(userId);
         if (totalAlbums == 0) {
@@ -70,7 +70,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     }
 
     @Override
-    @Cacheable(value = "analyticsCache", key = "#userId")
+    @Cacheable(value = "analyticsGenresCache", key = "#userId")
     public List<ChartDataDTO> getGenreDistribution(UUID userId) {
         return savedAlbumRepository.findTopGenresByUserId(userId, PageRequest.of(0, 10))
                 .stream()
@@ -79,7 +79,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     }
 
     @Override
-    @Cacheable(value = "analyticsCache", key = "#userId")
+    @Cacheable(value = "analyticsArtistsCache", key = "#userId")
     public List<ChartDataDTO> getTopArtists(UUID userId) {
         return savedAlbumRepository.findTopArtistsByUserId(userId, PageRequest.of(0, 5))
                 .stream()
@@ -88,7 +88,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     }
 
     @Override
-    @Cacheable(value = "analyticsCache", key = "#userId")
+    @Cacheable(value = "analyticsReleasesCache", key = "#userId")
     public List<ChartDataDTO> getAlbumsByReleaseYear(UUID userId) {
         return savedAlbumRepository.findAlbumsByReleaseYear(userId)
                 .stream()
@@ -97,7 +97,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     }
 
     @Override
-    @Cacheable(value = "analyticsCache", key = "#userId")
+    @Cacheable(value = "analyticsRatingsCache", key = "#userId")
     public List<ChartDataDTO> getRatingDistribution(UUID userId) {
         List<Object[]> queryResults = savedAlbumRepository.findRatingDistribution(userId);
         Map<String, Long> countsMap = queryResults.stream()

@@ -40,7 +40,7 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"analyticsCache", "recommendationCache"}, key = "#userId")
+    @CacheEvict(value = {"analyticsOverviewCache", "analyticsGenresCache", "analyticsArtistsCache", "analyticsReleasesCache", "analyticsRatingsCache", "recommendationCache"}, key = "#userId")
     public SavedAlbumResponseDTO saveAlbum(UUID userId, SavedAlbumRequestDTO requestDTO) {
         if (savedAlbumRepository.existsByAppleCatalogIdAndUserId(requestDTO.getAppleCatalogId(), userId)) {
             throw new DuplicateResourceException("Album with Apple Catalog ID " + requestDTO.getAppleCatalogId() + " is already saved.");
@@ -58,7 +58,7 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"analyticsCache", "recommendationCache"}, key = "#userId")
+    @CacheEvict(value = {"analyticsOverviewCache", "analyticsGenresCache", "analyticsArtistsCache", "analyticsReleasesCache", "analyticsRatingsCache", "recommendationCache"}, key = "#userId")
     public SavedAlbumResponseDTO updateAlbum(UUID id, UUID userId, SavedAlbumRequestDTO requestDTO) {
         SavedAlbum existingAlbum = savedAlbumRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Saved album not found or you don't have permission to access it"));
@@ -71,7 +71,7 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"analyticsCache", "recommendationCache"}, key = "#userId")
+    @CacheEvict(value = {"analyticsOverviewCache", "analyticsGenresCache", "analyticsArtistsCache", "analyticsReleasesCache", "analyticsRatingsCache", "recommendationCache"}, key = "#userId")
     public void deleteAlbum(UUID id, UUID userId) {
         SavedAlbum existingAlbum = savedAlbumRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Saved album not found or you don't have permission to access it"));
