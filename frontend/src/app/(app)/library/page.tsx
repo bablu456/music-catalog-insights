@@ -71,7 +71,7 @@ export default function LibraryPage() {
           <div className="flex flex-col items-center justify-center mt-20 space-y-4 text-destructive">
             <AlertCircle className="w-12 h-12" />
             <p className="font-medium text-lg">Failed to fetch library. Please try again.</p>
-            <p className="text-sm opacity-80">{(error as any)?.message}</p>
+            <p className="text-sm opacity-80">{error instanceof Error ? error.message : "Unknown error"}</p>
           </div>
         )}
 

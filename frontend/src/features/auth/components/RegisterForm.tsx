@@ -29,8 +29,9 @@ export function RegisterForm() {
     try {
       await register(data);
       toast.success("Account created successfully!");
-    } catch (error: any) {
-      const apiError = error.response?.data;
+    } catch (error: unknown) {
+      const e = error as { response?: { data?: { details?: string[]; message?: string } } };
+      const apiError = e.response?.data;
       const errorMessage = apiError?.details?.[0] || apiError?.message || "Registration failed. Please try again.";
       toast.error(errorMessage);
     } finally {

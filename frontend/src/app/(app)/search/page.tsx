@@ -28,8 +28,9 @@ export default function SearchPage() {
     onSuccess: () => {
       toast.success("Album saved to your library!");
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to save album");
+    onError: (error: unknown) => {
+      const e = error as { response?: { data?: { message?: string } } };
+      toast.error(e.response?.data?.message || "Failed to save album");
     }
   });
 
@@ -79,13 +80,13 @@ export default function SearchPage() {
           <div className="flex flex-col items-center justify-center mt-20 space-y-4 text-destructive">
             <AlertCircle className="w-12 h-12" />
             <p className="font-medium text-lg">Failed to fetch results. Please try again.</p>
-            <p className="text-sm opacity-80">{(error as any)?.message}</p>
+            <p className="text-sm opacity-80">{error instanceof Error ? error.message : "Unknown error"}</p>
           </div>
         )}
 
         {results && results.length === 0 && !isLoading && (
           <div className="flex flex-col items-center justify-center mt-20 space-y-4">
-            <p className="text-xl text-muted-foreground font-medium">No albums found for "{query}"</p>
+            <p className="text-xl text-muted-foreground font-medium">No albums found for &quot;{query}&quot;</p>
             <p className="text-sm text-muted-foreground/70">Try a different search term.</p>
           </div>
         )}

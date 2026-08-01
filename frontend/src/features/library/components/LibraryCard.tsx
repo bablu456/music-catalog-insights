@@ -86,7 +86,7 @@ export function LibraryCard({ album, onEdit, onDelete, isDeleting }: LibraryCard
           {album.userNotes && (
             <div className="mt-auto pt-3 border-t border-border/50">
               <p className="text-xs text-muted-foreground italic line-clamp-2">
-                "{album.userNotes}"
+                &quot;{album.userNotes}&quot;
               </p>
             </div>
           )}

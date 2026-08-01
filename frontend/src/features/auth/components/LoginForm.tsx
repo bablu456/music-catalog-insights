@@ -28,8 +28,9 @@ export function LoginForm() {
     try {
       await login(data);
       toast.success("Welcome back!");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Invalid credentials. Please try again.");
+    } catch (error: unknown) {
+      const e = error as { response?: { data?: { message?: string } } };
+      toast.error(e.response?.data?.message || "Invalid credentials. Please try again.");
     } finally {
       setIsPending(false);
     }

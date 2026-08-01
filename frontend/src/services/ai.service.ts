@@ -7,6 +7,7 @@ export interface RecommendationResponse {
   listeningTrends: string;
   interestingObservations: string;
   albumRecommendations: string[];
+  listeningPersonality?: string;
 }
 
 export const aiService = {

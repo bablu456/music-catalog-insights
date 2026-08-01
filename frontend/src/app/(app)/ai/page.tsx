@@ -68,7 +68,7 @@ export default function AIPage() {
     );
   }
 
-  if (isEmpty) {
+  if (isEmpty || !recommendation) {
     return (
       <div className="max-w-4xl space-y-6">
         <div className="space-y-1">
