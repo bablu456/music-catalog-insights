@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { aiService } from "@/services/ai.service";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,12 +12,24 @@ export default function AIPage() {
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['ai-recommendations'],
     queryFn: aiService.getRecommendations,
+    staleTime: 1000 * 60 * 60,
     refetchOnWindowFocus: false, // Don't refetch on focus to save API calls
   });
 
   const recommendation = data?.data;
   const hasError = isError || recommendation?.favouriteArtist === "Unavailable";
   const isEmpty = !isLoading && !hasError && !recommendation;
+
+  const [isSlowLoading, setIsSlowLoading] = useState(false);
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isLoading) {
+      timer = setTimeout(() => setIsSlowLoading(true), 3000);
+    } else {
+      setIsSlowLoading(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   if (isLoading) {
     return (
@@ -35,6 +48,7 @@ export default function AIPage() {
               </p>
             </div>
             <Loader2 className="h-6 w-6 animate-spin text-primary/50 mt-4" />
+            {isSlowLoading && <p className="text-sm text-muted-foreground mt-4">Waking up the server — this may take a few seconds.</p>}
           </CardContent>
         </Card>
       </div>

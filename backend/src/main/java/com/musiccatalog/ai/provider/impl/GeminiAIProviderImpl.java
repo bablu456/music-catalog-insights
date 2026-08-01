@@ -50,13 +50,18 @@ public class GeminiAIProviderImpl implements AIProvider {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             Map<String, Object> textPart = new HashMap<>();
-            textPart.put("text", prompt);
+            String schemaInstruction = "\n\nIMPORTANT: You must respond ONLY with a valid JSON object matching exactly this schema: {\"genreSummary\": \"string\", \"favouriteArtist\": \"string\", \"listeningTrends\": \"string\", \"interestingObservations\": \"string\", \"listeningPersonality\": \"string\", \"albumRecommendations\": [\"string\"]}";
+            textPart.put("text", prompt + schemaInstruction);
 
             Map<String, Object> partsMap = new HashMap<>();
             partsMap.put("parts", List.of(textPart));
 
+            Map<String, Object> generationConfig = new HashMap<>();
+            generationConfig.put("responseMimeType", "application/json");
+
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("contents", List.of(partsMap));
+            requestBody.put("generationConfig", generationConfig);
 
             HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
 

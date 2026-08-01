@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { searchService, SearchResult } from "@/services/search.service";
 import { libraryService, SaveAlbumRequest } from "@/services/library.service";
 import { SearchInput } from "@/features/search/components/SearchInput";
@@ -15,6 +15,7 @@ export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
   const size = 10;
+  const queryClient = useQueryClient();
 
   const { data: results, isLoading, isError, error } = useQuery({
     queryKey: ['search', query],
@@ -23,9 +24,23 @@ export default function SearchPage() {
     staleTime: 5 * 60 * 1000,
   });
 
+  useEffect(() => {
+    if (results && results.length > 0) {
+      queryClient.invalidateQueries({ queryKey: ['recent-activity'] });
+    }
+  }, [results, queryClient]);
+
   const saveMutation = useMutation({
     mutationFn: (data: SaveAlbumRequest) => libraryService.saveAlbum(data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['library'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-overview'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-genres'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-artists'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-releases'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-ratings'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activity'] });
+      queryClient.invalidateQueries({ queryKey: ['ai-recommendations'] });
       toast.success("Album saved to your library!");
     },
     onError: (error: unknown) => {

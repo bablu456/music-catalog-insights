@@ -30,6 +30,13 @@ export default function LibraryPage() {
     mutationFn: (id: string) => libraryService.deleteAlbum(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['library'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-overview'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-genres'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-artists'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-releases'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-ratings'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activity'] });
+      queryClient.invalidateQueries({ queryKey: ['ai-recommendations'] });
       toast.success("Album removed from library");
     },
     onError: () => {

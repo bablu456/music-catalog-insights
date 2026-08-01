@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Music2, Library, BarChart3, Sparkles, Search, ArrowRight, User, Disc, TrendingUp, Clock, FileText, CheckCircle2 } from "lucide-react";
@@ -63,6 +65,17 @@ export default function DashboardPage() {
   const isLibraryEmpty = overview?.totalAlbums === 0 && activities.length === 0;
   const isLoading = isAnalyticsLoading || isActivityLoading;
 
+  const [isSlowLoading, setIsSlowLoading] = useState(false);
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isLoading) {
+      timer = setTimeout(() => setIsSlowLoading(true), 3000);
+    } else {
+      setIsSlowLoading(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isLoading]);
+
   const handleActivityClick = (type: string, metadata: string) => {
     if (type === "SEARCH" && metadata) {
       router.push(`/search?q=${encodeURIComponent(metadata)}`);
@@ -92,18 +105,21 @@ export default function DashboardPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="flex flex-col gap-2 p-4">
-                <div className="h-8 w-8 rounded-lg bg-muted shrink-0" />
-                <div className="space-y-2 mt-2">
-                  <div className="h-6 w-16 bg-muted rounded" />
-                  <div className="h-3 w-24 bg-muted rounded" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="flex flex-col gap-2 p-4">
+                  <div className="h-8 w-8 rounded-lg bg-muted shrink-0" />
+                  <div className="space-y-2 mt-2">
+                    <div className="h-6 w-16 bg-muted rounded" />
+                    <div className="h-3 w-24 bg-muted rounded" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {isSlowLoading && <p className="text-sm text-muted-foreground mt-4">Waking up the server — this may take a few seconds.</p>}
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
